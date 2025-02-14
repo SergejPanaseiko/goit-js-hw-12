@@ -28,6 +28,7 @@ document.getElementById('loader').classList.remove('show');
 hideLoader();
 //======= Натискаэмо на кнопку
 form.addEventListener('submit', async (event) => {    //Кнопка 1 --------------------------------
+    page = 0;
     query = input.value.trim();
     getTotalHits();
     event.preventDefault();

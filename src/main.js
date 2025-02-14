@@ -1,27 +1,37 @@
 import { fetchImages } from './js/pixabay-api';
+import { totalHit } from './js/pixabay-api';
+import { renderGallery } from './js/render-functions.js'
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import { renderGallery } from './js/render-functions.js'
 const form = document.getElementById('search-form');
 const input = document.getElementById('search-input');
 const gallery = document.querySelector('.gallery');
 const loader = document.getElementById('loader');
+const button_footer=document.querySelector('.butn-footer');
 let lightbox = new SimpleLightbox('.gallery a');
 
+let page=0;
+let limit = 40;
+let totalElements = 1;
+let maxPage;
+let query;
+
 function showLoader() {
-document.getElementById('loader').classList.add('show');
+    document.getElementById('loader').classList.add('show');    
 }
 function hideLoader() {
 document.getElementById('loader').classList.remove('show');
 }
 
 hideLoader();
-form.addEventListener('submit', async (event) => {
+//======= Натискаэмо на кнопку
+form.addEventListener('submit', async (event) => {    //Кнопка 1 --------------------------------
+    query = input.value.trim();
+    getTotalHits();
     event.preventDefault();
-    const query = input.value.trim();
-
+// ======= Перевіряємо заповненість input
     if (!query) {
         iziToast.warning({
             title: 'Увага',
@@ -29,11 +39,13 @@ form.addEventListener('submit', async (event) => {
         });
         return;
     }
+//====== Перевіряємо, чи не перевищили необхідну кількість завантажень
+   
     gallery.innerHTML = '';
     showLoader();
-    try {
-        const images = await fetchImages(query);
-
+    //Завантажуємо картинки
+    try {        
+        const images = await fetchImages(query);//----------------------------------------------
         if (images.length === 0) {
             iziToast.info({
                 title: 'Немає результатів',
@@ -41,9 +53,12 @@ form.addEventListener('submit', async (event) => {
             });
             return;
         }
+        getTotalHits();
         hideLoader();
-        renderGallery(images);
-        lightbox.refresh();
+        renderGallery(images);//додаємо картинки
+        lightbox.refresh();//
+        button_footer.style.display = 'block';        
+        button_footer.disabled = false;        
     } catch (error) {
         loader.style.display = "none"; 
         iziToast.error({
@@ -55,3 +70,37 @@ form.addEventListener('submit', async (event) => {
     }
 });
 hideLoader();
+const totalPages = Math.ceil(totalElements / limit);
+
+const continuationButton = document.getElementById('search-forms-two');
+
+continuationButton.addEventListener('submit', async (event) => {// Кнопка нижня -------------------------
+    event.preventDefault();
+    getTotalHits();
+    const images = await fetchImages(query, page);
+    renderGallery(images);
+    window.scrollBy({ top: window.innerHeight-100, behavior: 'smooth' });
+    lightbox.refresh();    
+    });
+
+async function getTotalHits() {
+    try {
+        const hits = await totalHit(query); // Виклик функції із запитом
+        counter(hits);
+        } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+    }
+}
+
+function counter(hits) {
+    maxPage = Math.ceil(hits / limit);
+    page += 1;
+    if (maxPage < page) {
+        button_footer.style.display = 'none';
+        page = 0;
+    return iziToast.error({
+        position: 'bottomCenter',
+        message: "We're sorry, there are no more posts to load"
+    });        
+    }
+}

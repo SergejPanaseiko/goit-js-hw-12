@@ -3,7 +3,7 @@
     flex-wrap: wrap;
     justify-content: center;
     gap: 24px 24px;
-    max-width: 1150px;
+    max-width: 1950px;
     margin: 0 auto;
 }
 .gallery-item {
@@ -98,4 +98,21 @@ form {
 
 .show {
     display: block;
+}
+.butn-footer {
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 150%;
+    letter-spacing: 0.04em;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    width: 120px;
+    height: 40px;
+    background: #4e75ff;
+    text-align: center;
+    border: 1px solid #0630c9;
+    margin: 0 auto;
+    margin-top: 15px;
+    display: none;
 }
